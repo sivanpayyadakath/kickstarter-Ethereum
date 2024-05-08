@@ -1,0 +1,16 @@
+{
+  "name": "kickstarter-ethereum",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "dev": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "solc": "^0.8.15",
+    "web3": "^4.1.2"
+  }
+}
