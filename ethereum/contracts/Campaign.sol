@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.4.17;
 
 contract CampaignFactory {
-    address payable[] deployedCampaigns;
+    address[] deployedCampaigns;
 
     function createCampaign(uint minimumContribution) public {
         // pass msg.sender to get original manager address.
-        address newCampaign = address(new Campaign(minimumContribution, msg.sender));
-        deployedCampaigns.push(payable(newCampaign));
+        address newCampaign = new Campaign(minimumContribution, msg.sender);
+        deployedCampaigns.push(newCampaign);
     }
 
-    function getDeployedCampaigns() public view returns (address payable[] memory)  {
+    function getDeployedCampaigns() public view returns (address[])  {
         return deployedCampaigns;
     }
 }
@@ -31,7 +31,7 @@ contract Campaign {
     mapping(address => bool) public approvers;
     uint public approversCount;
 
-    constructor (uint minContribution, address creatorAddress) {
+    function Campaign(uint minContribution, address creatorAddress) public {
         manager = creatorAddress;
         minimumContribution = minContribution;
     }
@@ -43,20 +43,16 @@ contract Campaign {
         approversCount++;
     }
 
-    function createRequest(string memory description, uint value, address recipient) public restrictedManager {
-        // Request memory newRequest = Request({
-        //     description: description,
-        //     value: value,
-        //     recipient: recipient,
-        //     complete: false,
-        //     approvalCount: 0
-        // });
-        Request storage newRequest = requests.push(); 
-        newRequest.description = description;
-        newRequest.value = value;
-        newRequest.recipient = recipient;
-        newRequest.complete = false;
-        newRequest.approvalCount = 0;
+    function createRequest(string description, uint value, address recipient) public restrictedManager {
+        Request memory newRequest = Request({
+            description: description,
+            value: value,
+            recipient: recipient,
+            complete: false,
+            approvalCount: 0
+        });
+
+        requests.push(newRequest);
     }
 
     function approveRequest(uint requestIndex) public {
@@ -78,12 +74,12 @@ contract Campaign {
 
         require(request.approvalCount > (approversCount/2));
 
-        payable(request.recipient).transfer(request.value);
+        request.recipient.transfer(request.value);
 
         request.complete = true;
     }
 
-    modifier restrictedManager() {
+    modifier restrictedManager {
         require(msg.sender == manager);
         _;
     }
